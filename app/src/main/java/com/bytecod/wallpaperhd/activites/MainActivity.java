@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        //time for splash
         Handler handler = new Handler();
         handler.postDelayed(r, 2000);
-
+        // token for push notification
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
     }
-
+    // call for second Intent
     Runnable r = new Runnable(){
         @Override
                 public void run(){
