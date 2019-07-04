@@ -1,13 +1,17 @@
 package com.bytecod.wallpaperhd.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,22 +23,20 @@ import com.bytecod.wallpaperhd.models.Category;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.CategoryViewHolder> {
-
     private Context mCtx;
     private List<Category> categoryList;
-    private InterstitialAd mInterstitialAd;
+
+
 
 
     public CategoriesAdapter(Context mCtx, List<Category> categoryList){
         this.mCtx = mCtx;
         this.categoryList = categoryList;
-        mInterstitialAd = new InterstitialAd(mCtx);
-        mInterstitialAd.setAdUnitId("ID block here of video");
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
 
     }
 
@@ -70,33 +72,17 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Ca
             imageView = itemView.findViewById(R.id.imageview_reclycler);
             itemView.setOnClickListener(this);
         }
-        int i=2;
+
         @Override
         public void onClick(View v) {
 
-                int x = i%2;
-            if (mInterstitialAd.isLoaded()) {
-               if (x == 1){
-                   i++;
-                   mInterstitialAd.show();
-
-               }else {
-
-                   i++;
-
-               }
-            } else {
-
-
-                // Toast.makeText(mCtx,"Erro ao carregar", Toast.LENGTH_SHORT).show();
-            }
-
             int p =  getAdapterPosition();
-           Category c = categoryList.get(p);
-
+            Category c = categoryList.get(p);
             Intent intent = new Intent(mCtx, WallpaperActivity.class);
             intent.putExtra("category", c.name);
             mCtx.startActivity(intent);
         }
+
     }
+
 }
