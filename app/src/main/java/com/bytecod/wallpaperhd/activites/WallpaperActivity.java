@@ -1,10 +1,11 @@
 package com.bytecod.wallpaperhd.activites;
 
-import android.app.DownloadManager;
+import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Path;
-import android.icu.text.RelativeDateTimeFormatter;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -12,20 +13,20 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Layout;
-import android.util.LayoutDirection;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-
+import android.widget.Toast;
 import com.bytecod.wallpaperhd.R;
 import com.bytecod.wallpaperhd.adapters.WallpaperAdapter;
-import com.bytecod.wallpaperhd.models.Category;
 import com.bytecod.wallpaperhd.models.Wallpaper;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -34,75 +35,72 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.bytecod.wallpaperhd.adapters.WallpaperAdapter;
-import com.bytecod.wallpaperhd.models.Wallpaper;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
-
-
-public class WallpaperActivity extends AppCompatActivity {
-
+public class WallpaperActivity extends AppCompatActivity implements RewardedVideoAdListener {
+    Dialog myDialog;
+    private RewardedVideoAd mAd;
     private AdView mAdView;
-
     List<Wallpaper> wallpaperList;
     List<Wallpaper> favList;
-    RecyclerView recyclerView;
+    RecyclerView recyclerView, recyclerView3;
     WallpaperAdapter adapter;
-
     DatabaseReference dbWallpapers, dbFavs;
     ProgressBar progressBar;
-
     FloatingActionMenu materialDesignFAM;
-    FloatingActionButton floatingActionButton1, floatingActionButton2, floatingActionButton3, floatingActionButton4;
-
+    FloatingActionButton floatingActionButton1, floatingActionButton2, floatingActionButton3;
+    String match;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallpaper);
-        MobileAds.initialize(this, "ID app here");
+        MobileAds.initialize(this, "ca-app-pub-1231054257159317~9306289743");
+        mAd = MobileAds.getRewardedVideoAdInstance(this);
+        mAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
+
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
+        //popup
+        myDialog = new Dialog(this);
         materialDesignFAM = (FloatingActionMenu) findViewById(R.id.material_design_android_floating_action_menu);
-        //floatingActionButton1 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item1);
         floatingActionButton2 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item2);
         floatingActionButton3 = (FloatingActionButton) findViewById(R.id.material_design_floating_action_menu_item3);
 
-
-
+        // Toast.makeText(this, "Essa categoria "+category, Toast.LENGTH_LONG).show();
         Intent intent = getIntent();
         final String category = intent.getStringExtra("category");
+        String match =  category;
+        progressBar = findViewById(R.id.progressbar);
+        char cat = category.charAt(category.length()-1);
+        if (cat == '2'){
+            myDialog.setContentView(R.layout.custompopup);
+            myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            myDialog.show();
+        }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(category);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
+        //toolbar.setTitle(category);
+        //setSupportActionBar(toolbar);
 
         favList = new ArrayList<>();
         wallpaperList = new ArrayList<>();
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new WallpaperAdapter(this, wallpaperList);
-
         recyclerView.setAdapter(adapter);
 
-
-
-        progressBar = findViewById(R.id.progressbar);
         dbWallpapers = FirebaseDatabase.getInstance().getReference("images")
                 .child(category);
-
-
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             dbFavs = FirebaseDatabase.getInstance().getReference("users")
                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -110,11 +108,91 @@ public class WallpaperActivity extends AppCompatActivity {
                     .child(category);
             fetchFavWallpapers(category);
         } else {
-            fetchWallpapers(category);
+            if (cat == '2'){
+
+            }else{
+                fetchWallpapers(category);
+            }
+           // fetchWallpapers(category);
         }
 
     }
+    public void back(View view){
+        Intent intent = new Intent(WallpaperActivity.this, HomeActivity.class);
+        startActivity(intent);
+    }
+    private void loadRewardedVideoAd(){
 
+            // Toast.makeText(this, "não cerregado", Toast.LENGTH_LONG).show();
+            mAd.loadAd("ca-app-pub-1231054257159317/7541866023",
+                    new AdRequest.Builder().build());
+            //original ca-app-pub-1231054257159317/7541866023
+            onRewardedVideoAdLoaded();
+    }
+    public void startVideo(View view){
+        // Toast.makeText(this, "antes do if", Toast.LENGTH_LONG).show();
+        if (mAd.isLoaded()){
+
+            mAd.show();
+        }
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded()
+    {
+       // Toast.makeText(this, "carregado", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+        loadRewardedVideoAd();
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+        myDialog.dismiss();
+        fetchWallpapers(match);
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+
+    }
+
+    @Override
+    public void onRewardedVideoCompleted() {
+
+    }
+    @Override
+    protected void onPause(){
+        mAd.pause(this);
+        super.onPause();
+    }
+    @Override
+    protected void onResume(){
+        mAd.resume(this);
+        super.onResume();
+    }
+    @Override
+    protected void onDestroy(){
+        mAd.destroy(this);
+        super.onDestroy();
+    }
     private void fetchFavWallpapers(final String category) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -238,4 +316,5 @@ public class WallpaperActivity extends AppCompatActivity {
         }
         return false;
     }
+
 }
