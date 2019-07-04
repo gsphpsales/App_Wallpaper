@@ -8,13 +8,9 @@
         />
 
     <item
-        android:icon="@drawable/ic_favorite"
+        android:icon="@drawable/ic_fiber_new_black_24dp"
         android:id="@+id/nav_fav"
         android:title="@string/nav_favourites"
         />
-    <item
-        android:icon="@drawable/ic_input_black_24dp"
-        android:id="@+id/nav_settings"
-        android:title="@string/nav_settings"
-        />
+
 </menu>

@@ -2,11 +2,7 @@
     <string name="app_name">Wallpaper Series e Filmes</string>
     <string name="app_title">Series e Filmes Wallpaper</string>
     <string name="nav_home">Home</string>
-    <string name="nav_favourites">Favourites</string>
-    <string name="nav_settings">Login</string>
-    <string name="sign">Você precisa fazer o login</string>
-    <string name="login">Você precisa fazer o login para salvar seus favoritos.</string>
-    <string name="logout">LOGOUT</string>
+    <string name="nav_favourites">Instagram</string>
     <string name="SUCESSO">Agora seus wallpapers favoritos serão salvos.</string>
     <string name="erro">Error</string>
     <string name="developer">Gilson Sales</string>
@@ -16,5 +12,11 @@
     <string name="contato">Contato</string>
     <string name="aboutme">Desenvolvedor Mobile e Web, com mais de 10 anos de experiência no mercado.
     Atualmente presta seus serviços de desenvolvimento para o Grupo Edson Queiroz.</string>
+    <string name="rewaded">Para ter acesso ao Premium, nos ajude a manter o Aplicativo,
+    assista ao video e ganhe acesso.</string>
+    <string name="video">Assistir ao vídeo</string>
+    <string name="close">X</string>
+    <string name="title_activity_voltar">voltar</string>
+    <string name="title_activity_teste">teste</string>
 
 </resources>
