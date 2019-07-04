@@ -1,5 +1,6 @@
 package com.bytecod.wallpaperhd.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,13 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FavouritesFragment extends Fragment {
-
-    List<Wallpaper> favWalls;
-    RecyclerView recyclerView;
-    ProgressBar progressBar;
-    WallpaperAdapter adapter;
-
-    DatabaseReference dbFavs;
+    WebView webView;
+    private Context mContext;
 
     @Nullable
     @Override
@@ -43,63 +41,18 @@ public class FavouritesFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        favWalls = new ArrayList<>();
-        recyclerView = view.findViewById(R.id.recycler_view);
-        progressBar = view.findViewById(R.id.progressbar);
-        adapter = new WallpaperAdapter(getActivity(), favWalls);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_are, new SettingsFragment())
-                    .commit();
-            return;
-        }
 
 
-        dbFavs = FirebaseDatabase.getInstance().getReference("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .child("favourites");
+        webView = (WebView) view.findViewById(R.id.webviewid);
 
-        progressBar.setVisibility(View.VISIBLE);
-
-        dbFavs.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                progressBar.setVisibility(View.GONE);
-
-                for (DataSnapshot category : dataSnapshot.getChildren()) {
-
-                    for (DataSnapshot wallpaperSnapshot : category.getChildren()) {
+        webView.loadUrl("https://www.instagram.com/filmes_series_curiosity/");
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        registerForContextMenu(webView);
 
 
-                        String id = wallpaperSnapshot.getKey();
-                        String title = wallpaperSnapshot.child("title").getValue(String.class);
-                        String desc = wallpaperSnapshot.child("desc").getValue(String.class);
-                        String url = wallpaperSnapshot.child("url").getValue(String.class);
 
-                        Wallpaper w = new Wallpaper(id, title, desc, url, url, category.getKey());
-                        w.isFavourite = true;
-
-                        favWalls.add(w);
-
-                    }
-
-                }
-
-                adapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
     }
 }
