@@ -10,21 +10,27 @@ import android.view.MenuItem;
 import com.bytecod.wallpaperhd.R;
 import com.bytecod.wallpaperhd.fragments.FavouritesFragment;
 import com.bytecod.wallpaperhd.fragments.HomeFragment;
-import com.bytecod.wallpaperhd.fragments.SettingsFragment;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
     BottomNavigationView bottomNavigationView;
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        MobileAds.initialize(this,
-                "ID APP where");
+        MobileAds.initialize(this, "ca-app-pub-1231054257159317~9306289743");
+        mAdView = findViewById(R.id.adViewcat);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         bottomNavigationView = findViewById(R.id.botto_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         displayFragment(new HomeFragment());
+
     }
     private void displayFragment(Fragment fragment){
     getSupportFragmentManager()
@@ -41,9 +47,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
             case R.id.nav_fav:
                 fragment = new FavouritesFragment();
                 break;
-            case R.id.nav_settings:
-                fragment = new SettingsFragment();
-                break;
+
                 default:
                     fragment = new HomeFragment();
                     break;
